@@ -1,13 +1,15 @@
 import sys, math, collections, heapq, itertools
-F = sys.stdin
-def single_input(): return F.readline().strip("\n")
-def line_input(): return F.readline().strip("\n").split()
+def single_input(F): return F.readline().strip("\n")
+def line_input(F): return F.readline().strip("\n").split()
 def gcd(a, b):
     a, b = max(a, b), min(a, b)
     while a % b > 0: a, b = b, a % b
     return b
   
 def solve():
+    F = sys.stdin
+    INF = 10 ** 25
+    mod = 7 + 10 ** 9
     return 0
   
 if __name__ == "__main__":
