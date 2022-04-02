@@ -1,3 +1,5 @@
+from calendar import c
+from heapq import heapify, heappop
 import sys
 import collections
 
@@ -86,6 +88,68 @@ def solve():
     input = sys.stdin.readline 
     INF = 10 ** 25
     mod = 7 + 10 ** 9
+    N, M = map(int, input().split())
+    edge = [[] for _ in range(N)]
+    reverseEdge = [[] for _ in range(N)]
+    for _ in range(M):
+        u, v = map(int, input().split())
+        edge[u-1].append(v-1)
+        reverseEdge[v-1].append(u-1)
+    
+    indexes = [N + 1] * N
+    visited = [False] * N
+    queue = [int(i) for i in reversed(range(N))]
+    index = 0
+    while queue:
+        currentNode = queue.pop()
+        if indexes[currentNode] == N + 1:
+            visited[currentNode] = True
+            nextNodes = []
+            for nextNode in edge[currentNode]:
+                if not visited[nextNode]:
+                    nextNodes.append(nextNode)
+            if len(nextNodes) == 0:
+                indexes[currentNode] = index
+                index += 1
+            else:
+                queue.append(currentNode)
+                for nextNode in nextNodes: queue.append(nextNode)
+    
+    searched = [False] * N
+    hq = [(-indexes[i], i) for i in range(N)]
+    hq.sort()
+    groups = []
+    for n in hq:
+        index, startNode = n
+        if not searched[startNode]:
+            queue2 = [startNode]
+            group = []
+            while queue2:
+                currentNode = queue2.pop()
+                if not searched[currentNode]:
+                    searched[currentNode] = True
+                    group.append(currentNode)
+                    for nextNode in reverseEdge[currentNode]:
+                        if not searched[nextNode]:
+                            queue2.append(nextNode)
+            groups.append(group)
+
+    k = len(groups)
+    idx = [None] * N
+    for i in range(k):
+        for v in groups[i]:
+            idx[v] = i
+    DP = [False] * k
+    ans = 0
+    for i in reversed(range(k)):
+        if len(groups[i]) == 1:
+            for v in edge[groups[i][0]]:
+                DP[i] |= DP[idx[v]]
+        else:
+            DP[i] = True
+        if DP[i]: ans += len(groups[i])
+    
+    print(ans)
     return 0
   
 if __name__ == "__main__":

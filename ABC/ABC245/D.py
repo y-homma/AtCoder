@@ -86,6 +86,16 @@ def solve():
     input = sys.stdin.readline 
     INF = 10 ** 25
     mod = 7 + 10 ** 9
+    N, M = map(int, input().split())
+    A = list(map(int, input().split()))
+    C = list(map(int, input().split()))
+    B = [None] * (M + 1)
+    for i in reversed(range(M + 1)):
+        B[i] = C[i + N] // A[N]
+        for j in range(N + 1):
+            C[i + j] -= B[i] * A[j]
+    print(*B)
+    
     return 0
   
 if __name__ == "__main__":
