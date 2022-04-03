@@ -3,12 +3,12 @@ import collections
 
 class Alphabet: #Trueなら大文字
     def __init__(self, capitalize):
-        self.index = dict() #アルファベットを数字に変換
+        self.indexOf = dict() #アルファベットを数字に変換
         self.abc = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n"\
             ,"o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
         if capitalize: 
             for i in range(26): self.abc[i] = self.abc[i].upper()
-        for i, a in enumerate(self.abc): self.index[a] = i
+        for i, a in enumerate(self.abc): self.indexOf[a] = i
 
     # 指定したIndexの英文字を取得します
     def get(self, index):
@@ -16,7 +16,7 @@ class Alphabet: #Trueなら大文字
 
     # 指定した英文字のインデックスを取得します
     def indexOf(self, chr):
-        return self.index[chr]
+        return self.indexOf[chr]
 
 class Math:
     def __init__(self):
@@ -86,6 +86,17 @@ def solve():
     input = sys.stdin.readline 
     INF = 10 ** 25
     mod = 7 + 10 ** 9
+    x1, y1 = map(int, input().split())
+    x2, y2 = map(int, input().split())
+    x3, y3 = map(int, input().split())
+    x, y = 0, 0
+    if x1 == x2: x = x3
+    elif x1 == x3: x = x2
+    else: x = x1
+    if y1 == y2: y = y3
+    elif y1 == y3: y = y2
+    else: y = y1
+    print(x, y)
     return 0
   
 if __name__ == "__main__":
