@@ -81,11 +81,50 @@ class SegTree:
  
     def find(self, lowerBound, upperBound):
         return self.findInner(lowerBound, upperBound, 0, self.size - 1, 0)
+
+# N桁のbitにフラグが何本立っているか計算する
+def convertBitToCount(bit, N):
+    count = 0
+    rem = bit
+    for i in range(N):
+        if rem & 1 == 1:
+            count += 1
+        rem = rem >> 1
+    return count
   
 def solve():
     input = sys.stdin.readline 
     INF = 10 ** 25
-    mod = 7 + 10 ** 9
+    mod = 998244353
+    N, L = map(int, input().split())
+    S = [""] * N
+    sBit = [0] * N
+    lowerAlphabet = Alphabet(False)
+    for i in range(N):
+        s = input().strip("\n")
+        bit = 0
+        for j in range(len(s)):
+            bit |= (1 << lowerAlphabet.indexOf(s[j]))
+        S[i] = s
+        sBit[i] = bit
+    
+    sum = 0
+    for i in range(1, pow(2, N)):
+        commonBits = pow(2, 26) - 1
+        lows = 0
+        lowBit = i
+        for j in range(N):
+            if lowBit & 1 == 1:
+                lows += 1
+                commonBits &= sBit[j]
+            lowBit = lowBit >> 1
+        
+        commonChars = convertBitToCount(commonBits, 26)
+        sum += pow(-1, lows + 1) * pow(commonChars, L, mod)
+        sum %= mod
+    
+    print(sum)
+        
     return 0
   
 if __name__ == "__main__":
