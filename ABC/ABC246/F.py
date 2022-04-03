@@ -121,6 +121,7 @@ def solve():
         
         commonChars = convertBitToCount(commonBits, 26)
         sum += pow(-1, rows + 1) * pow(commonChars, L, mod)
+
         sum %= mod
     
     print(sum)
