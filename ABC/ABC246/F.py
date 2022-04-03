@@ -111,16 +111,16 @@ def solve():
     sum = 0
     for i in range(1, pow(2, N)):
         commonBits = pow(2, 26) - 1
-        lows = 0
-        lowBit = i
+        rows = 0
+        rowBit = i
         for j in range(N):
-            if lowBit & 1 == 1:
-                lows += 1
+            if rowBit & 1 == 1:
+                rows += 1
                 commonBits &= sBit[j]
-            lowBit = lowBit >> 1
+            rowBit = rowBit >> 1
         
         commonChars = convertBitToCount(commonBits, 26)
-        sum += pow(-1, lows + 1) * pow(commonChars, L, mod)
+        sum += pow(-1, rows + 1) * pow(commonChars, L, mod)
         sum %= mod
     
     print(sum)
