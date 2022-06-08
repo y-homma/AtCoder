@@ -6,7 +6,7 @@ def LCS(s, t): #文字列sと文字列tの最長共通部分列を求める
         for j in range(len(t)):
             if s[i] == t[j]: DP[i + 1][j + 1] = DP[i][j] + 1
             else: DP[i + 1][j + 1] = max(DP[i][j + 1], DP[i + 1][j])
-    return DP[N][M] 
+    return DP[s][t] 
 
 
 def solve():
