@@ -100,7 +100,7 @@ class AVLTree:
             t.left = self.delete_sub(t.left, key)
             return self.balanceR(t)
         elif key > t.key:
-            t.right - self.delete_sub(t.right, key)
+            t.right = self.delete_sub(t.right, key)
             return self.balanceL(t)
         else:
             if t.left is None:
