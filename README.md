@@ -1,5 +1,15 @@
 # 競技プログラミング
 
+## C++実行(WSL2, Ubuntu24)
+```
+# 例: ABC/ABC001/A.cpp
+$ bd A
+$ io -f ./A.out -i in.txt -o out.txt
+
+# ../../../build.sh A
+# ../../../io.sh -f ./A.out -i in.txt -o out.txt
+```
+
 ## python3用テンプレート
 
 作成済みライブラリ

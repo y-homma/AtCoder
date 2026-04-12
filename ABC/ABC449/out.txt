@@ -1,0 +1,16 @@
+Bound; -1
+1
+Bound; -1
+1
+Bound; -1
+2
+Bound; 0
+3
+Bound; 1
+2
+Bound; 1
+3
+Bound; 3
+3
+Bound; 3
+3
