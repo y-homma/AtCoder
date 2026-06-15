@@ -1,5 +1,6 @@
 import sys
-import collections
+from collections import deque, defaultdict
+from sortedcontainers import SortedSet, SortedList, SortedDict
 
 class Alphabet: #Trueなら大文字
     def __init__(self, capitalize):
