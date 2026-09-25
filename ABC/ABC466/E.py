@@ -97,34 +97,25 @@ def isInside(h, w, H, W):
 
 def solve():
     input = sys.stdin.readline 
-    H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
-    Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-    while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
+    N, K = map(int, input().split())
+    C = [tuple(map(int, input().split())) for _ in range(N)]
+
+    DP = [[0] * (2 * K + 1) for _ in range(N)]
+    DP[0][0] = C[0][0]
+    DP[0][1] = C[0][1]
+    for i in range(1, N):
+        a, b = C[i]
+        for k in range(2 * K + 1):
+            prev = DP[i-1][k]
+            if prev > 0:
+                if k % 2 == 0:
+                    DP[i][k] = max(DP[i][k], prev + a)
+                    if k < 2 * K:
+                        DP[i][k+1] = max(DP[i][k+1], prev + b)
+                else:
+                    DP[i][k] = max(DP[i][k], prev + b)
+                    DP[i][k+1] = max(DP[i][k+1], prev + a)
+    print(max(DP[N-1]))
 
     return 0
                             

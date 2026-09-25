@@ -97,35 +97,49 @@ def isInside(h, w, H, W):
 
 def solve():
     input = sys.stdin.readline 
-    H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
-    Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-    while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
-
+    H, W, Q = map(int, input().split())
+    B = [tuple(map(str, input().strip("\n").split())) for _ in range(Q)]
+    Col = [[""] * W for _ in range(H)]
+    if H < W:
+        maxW = [-1] * H
+        for i in reversed(range(Q)):
+            r, c, x = B[i]
+            r = int(r)
+            c = int(c) - 1
+            for h in reversed(range(r)):
+                if c <= maxW[h]:
+                    break
+                maxW[h] = c
+                Col[h][c] = x
+        for h in range(H):
+            prev = "A"
+            for w in reversed(range(W)):
+                if Col[h][w] == "":
+                    Col[h][w] = prev
+                else:
+                    prev = Col[h][w]
+            print("".join(Col[h]))
+    else:
+        maxH = [-1] * W
+        for i in reversed(range(Q)):
+            r, c, x = B[i]
+            r = int(r) - 1
+            c = int(c)
+            for w in reversed(range(c)):
+                if r <= maxH[w]:
+                    break
+                maxH[w] = r
+                Col[r][w] = x
+        for w in range(W):
+            prev = "A"
+            for h in reversed(range(H)):
+                if Col[h][w] == "":
+                    Col[h][w] = prev
+                else:
+                    prev = Col[h][w]
+        for h in Col:
+            print("".join(h))
+                
     return 0
                             
 if __name__ == "__main__":

@@ -97,35 +97,60 @@ def isInside(h, w, H, W):
 
 def solve():
     input = sys.stdin.readline 
-    H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
-    Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-    while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
+    N, M = map(int, input().split())
+    if N == 0 or M == 0:
+        print(0)
+        return 0
+    mod = 998244353
+    MBit = [0] * 60
+    tM = M
+    for i in range(60):
+        MBit[i] = tM % 2
+        tM //= 2
+    
+    NBit = []
+    tn = N
+    while tn > 0:
+        NBit.append(tn % 2)
+        tn //= 2
+    NSize = len(NBit)
 
+    
+    def count(i, NBit, NSize):
+        if i == 0:
+            d = [0] * NSize
+            if NBit[i] == 1:
+                d[i] = 1
+            return d
+        
+        lower = count(i-1, NBit, NSize)
+        if NBit[i] == 1:
+            # 0にすることで、2**i以下のすべてを選べる
+            base = 2 ** (i-1)
+            for j in range(i):
+                lower[j] += base
+
+            b = 1
+            lower[i] = 1
+            for j in range(i):
+                if NBit[j] == 1:
+                    lower[i] += b
+                b *= 2
+
+        return lower
+    NCounts = count(NSize-1, NBit, NSize)
+    
+    ans = 0
+    for i, m in enumerate(MBit):
+        if m == 0:
+            continue
+        else:
+            if i >= len(NCounts): continue
+            ans += NCounts[i]
+            ans %= mod
+
+    print(ans)  
+                
     return 0
                             
 if __name__ == "__main__":

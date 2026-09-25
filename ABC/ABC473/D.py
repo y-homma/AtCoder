@@ -1,7 +1,7 @@
 import sys
 from collections import deque
-# from itertools import permutations
-# from heapq import heapify, heappop, heappush
+from itertools import permutations
+from heapq import heapify, heappop, heappush
 # from sortedcontainers import SortedSet, SortedList, SortedDict
 import bisect
 sys.setrecursionlimit(10**6)
@@ -92,40 +92,69 @@ class UFT: #Union-find tree class
             self.tree[b] = a
             if self.rank[a] == self.rank[b]: self.rank[a] += 1
 
-def isInside(h, w, H, W):
-    return 0 <= h < H and 0 <= w < W
+    def isConnect(self, a, b):
+        return self.find(a) == self.find(b)
+
+class Fraction:
+    def __init__(self, x: int, y: int):
+        self.x = x
+        self.y = y
+
+    def getCoordinate(self):
+        return (self.x, self.y)
+    
+    def __lt__(self, other):
+        return self.y * other.x < self.x * other.y
+    
+    def __le__(self, other):
+        return self.y * other.x <= self.x * other.y
+    
+    def __eq__(self, other):
+        return self.y * other.x == other.y * self.x
+
+class Grid:
+    def __init__(self, H: int, W: int):
+        self.H = H
+        self.W = W
+
+    def isInside(self, h, w):
+        return 0 <= h < self.H and 0 <= w < self.W
+
+def modPow(base, exp, mod):
+    if exp == 0: return 1
+    elif exp == 1: return base % mod
+    half = modPow(base, exp >> 1, mod)
+    if exp % 2 == 0:
+        return (half * half) % mod
+    else:
+        return (half * half * base) % mod
 
 def solve():
     input = sys.stdin.readline 
-    H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
-    Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-    while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
+    mod = 998244353
+    N, K = map(int, input().split())
+    Q = [0] * N
 
+    def find(currentSum, targetSize, idx):
+        if idx == targetSize:
+            left = K - currentSum
+            if left % idx == 0:
+                Q[idx-1] = left // idx
+                print(" ".join(str(q) for q in Q))
+                return
+            else:
+                return
+        else:
+            for i in range((K - currentSum) // idx + 1):
+                add = idx * i
+                if currentSum + add > K:
+                    break
+                else:
+                    Q[idx-1] = i
+                    find(currentSum + add, targetSize, idx + 1)
+            return
+
+    find(0, N, 1)
     return 0
                             
 if __name__ == "__main__":

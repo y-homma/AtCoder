@@ -1,7 +1,7 @@
 import sys
 from collections import deque
 # from itertools import permutations
-# from heapq import heapify, heappop, heappush
+from heapq import heapify, heappop, heappush
 # from sortedcontainers import SortedSet, SortedList, SortedDict
 import bisect
 sys.setrecursionlimit(10**6)
@@ -97,34 +97,28 @@ def isInside(h, w, H, W):
 
 def solve():
     input = sys.stdin.readline 
-    H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
-    Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-    while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
+    T = int(input())
+    Ans = [0] * T
+    for t in range(T):
+        X, Y, K = map(int, input().split())
+        ans = 10000000000000
+        base = X
+        baseCount = 0
+        while base >= 0:
+            lower = base
+            higher = base
+            count = baseCount
+            while higher < Y:
+                lower *= K
+                higher = higher * K + K - 1
+                count += 1
+            if lower <= Y <= higher:
+                ans = min(ans, count)
+            if base == 0: break
+            base //= K
+            baseCount += 1
+        Ans[t] = ans
+    print(*Ans, sep="\n")
 
     return 0
                             

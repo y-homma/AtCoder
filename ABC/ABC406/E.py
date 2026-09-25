@@ -95,36 +95,49 @@ class UFT: #Union-find tree class
 def isInside(h, w, H, W):
     return 0 <= h < H and 0 <= w < W
 
+def toBit(N):
+    bit = deque()
+    i = N
+    while i > 0:
+        bit.appendleft(i % 2)
+        i >>= 1
+    return bit
+
 def solve():
     input = sys.stdin.readline 
-    H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
-    Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-    while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
+    mod = 998244353
+    T = int(input())
+    Ans = [0] * T
+    for t in range(T):
+        N, K = map(int, input().split())
+        NBit = toBit(N)
+        BIT = len(NBit)
+        DP = [[[[0, 0] for count in range(K + 2)] for flg in range(2)] for _ in range(BIT)]
+        DP[0][0][1] = [1, 1]
+        for bit in range(1, BIT):
+            cbit = NBit[bit]
+            for count in range(1, K + 1):
+                preTop = DP[bit-1][0][count]
+                preUnder = DP[bit-1][1][count]
+                if preTop[1] > 0:
+                    if count + cbit <= K:
+                        DP[bit][0][count+cbit][0] = (DP[bit][0][count+cbit][0] + cbit * preTop[1] + preTop[0] * 2) % mod
+                        DP[bit][0][count+cbit][1] += preTop[1]
+                    if cbit == 1:
+                        DP[bit][1][count][0] = (DP[bit][1][count][0] + preTop[0] * 2) % mod
+                        DP[bit][1][count][1] += preTop[1]
+                
+                if preUnder[1] > 0:
+                    DP[bit][1][count][0] = (DP[bit][1][count][0] + preUnder[0] * 2) % mod
+                    DP[bit][1][count][1] += preUnder[1]
+                    if count + 1 <= K:
+                        DP[bit][1][count+1][0] = (DP[bit][1][count+1][0] + preUnder[1] + preUnder[0] * 2) % mod
+                        DP[bit][1][count+1][1] += preUnder[1]
+
+            DP[bit][1][1][0] += 1
+            DP[bit][1][1][1] += 1
+        Ans[t] = (DP[BIT-1][0][K][0] + DP[BIT-1][1][K][0]) % mod
+    print(*Ans, sep="\n")
 
     return 0
                             

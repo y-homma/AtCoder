@@ -92,39 +92,50 @@ class UFT: #Union-find tree class
             self.tree[b] = a
             if self.rank[a] == self.rank[b]: self.rank[a] += 1
 
-def isInside(h, w, H, W):
-    return 0 <= h < H and 0 <= w < W
-
 def solve():
     input = sys.stdin.readline 
-    H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
+    N, M = map(int, input().split())
+    S = [input().strip("\n") for _ in range(N)]
+    V = [[[False] * 4 for m in range(M)] for _ in range(N)]
+    D = {
+        "U": (-1, 0),
+        "D": (1, 0),
+        "L": (0, -1),
+        "R": (0, 1)
+    }
+    DI = {
+        "U": 0,
+        "D": 1,
+        "L": 2,
+        "R": 3
+    }
     Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+    for dir in D.keys():
+        Q.append((1, 1, dir))
     while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
+        ci, cj, dir = Q.popleft()
+        didx = DI[dir]
+        if not V[ci][cj][didx]:
+            V[ci][cj][didx] = True
+            ni = ci + D[dir][0]
+            nj = cj + D[dir][1]
+            if S[ni][nj] == ".":
+                Q.append((ni, nj, dir))
+            else:
+                for ndir, d in D.items():
+                    ni = ci + d[0]
+                    nj = cj + d[1]
+                    if S[ni][nj] == ".":
+                        Q.append((ni, nj, ndir))
+    count = 0
+    for n in range(1, N-1):
+        for m in range(1, M-1):
+            isPassed = False
+            for v in V[n][m]:
+                isPassed |= v
+            if isPassed:
+                count += 1
+    print(count)
 
     return 0
                             

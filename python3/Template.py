@@ -1,23 +1,27 @@
 import sys
-from collections import deque, defaultdict
-from sortedcontainers import SortedSet, SortedList, SortedDict
+from collections import deque
+# from itertools import permutations
+# from heapq import heapify, heappop, heappush
+# from sortedcontainers import SortedSet, SortedList, SortedDict
+import bisect
+sys.setrecursionlimit(10**6)
 
 class Alphabet: #Trueなら大文字
     def __init__(self, capitalize):
-        self.index = dict() #アルファベットを数字に変換
+        self.indexOf = dict() #アルファベットを数字に変換
         self.abc = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n"\
             ,"o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
         if capitalize: 
             for i in range(26): self.abc[i] = self.abc[i].upper()
-        for i, a in enumerate(self.abc): self.index[a] = i
+        for i, a in enumerate(self.abc): self.indexOf[a] = i
 
     # 指定したIndexの英文字を取得します
     def get(self, index):
         return self.abc[index]
 
     # 指定した英文字のインデックスを取得します
-    def indexOf(self, chr):
-        return self.index[chr]
+    def index(self, chr):
+        return self.indexOf[chr]
 
 class Math:
     def __init__(self):
@@ -46,48 +50,90 @@ class Math:
         while a % b > 0: a, b = b, a % b
         return b
 
-class SegTree:
-    def __init__(self, N, defaultValue, isLower):
-        nextP2 = 1
-        while nextP2 < N:
-            nextP2 *= 2
-        self.tree = [defaultValue] * (nextP2 * 2 - 1)
-        self.base = nextP2 - 1
-        self.size = nextP2
-        self.isLower = isLower
-        self.defaultValue = defaultValue
- 
-    def update(self, value, index):
-        self.tree[self.base + index] = value
-        toUpdateIndex = self.base + index
-        while toUpdateIndex > 0:
-            toUpdateIndex = (toUpdateIndex - 1) // 2
-            if self.isLower:
-                self.tree[toUpdateIndex] = min(self.tree[toUpdateIndex * 2 + 1], self.tree[toUpdateIndex * 2 + 2])
-            else:
-                self.tree[toUpdateIndex] = max(self.tree[toUpdateIndex * 2 + 1], self.tree[toUpdateIndex * 2 + 2])
+class Combination:
+    def __init__(self, size: int, mod: int):
+        self.size = size
+        self.mod = mod
+        self.fact = [1] * (size + 1)
+        for i in range(1, size + 1):
+            self.fact[i] = (self.fact[i-1] * i) % mod
+        self.factN = self.fact[size]
+        self.revFact = [1] * (size + 1)
+        self.revFact[size] = pow(self.factN, -1, mod)
+        for i in reversed(range(1, size)):
+            self.revFact[i] = (self.revFact[i+1] * (i + 1)) % mod
     
-    def findInner(self, lowerBound, upperBound, left, right, index):
-        if lowerBound <= left and right <= upperBound:
-            return self.tree[index]
-        if upperBound < left or right < lowerBound:
-            return self.defaultValue
-        half = (left + right) // 2
-        leftHalf = self.findInner(lowerBound, upperBound, left, half, 2 * index + 1)
-        rightHalf = self.findInner(lowerBound, upperBound, half + 1, right, 2 * index + 2)
-        if self.isLower:
-            return min(leftHalf, rightHalf)
+    def comb(self, r: int) -> int:
+        if r < 0 or self.size < r: return 0
+        return (self.factN * self.revFact[self.size - r] * self.revFact[r]) % self.mod
+    
+    def combNR(self, N: int, r: int) -> int:
+        if N > self.size: return 0
+        if r < 0 or N < r: return 0
+        return (self.fact[N] * self.revFact[N - r] * self.revFact[r]) % self.mod
+    
+class UFT: #Union-find tree class
+    def __init__(self, N): 
+        self.tree = [int(i) for i in range(N)] 
+        self.rank = [0 for i in range(N)]
+
+    def find(self, a):
+        if self.tree[a] == a: return a
         else:
-            return max(leftHalf, rightHalf)
- 
-    def find(self, lowerBound, upperBound):
-        return self.findInner(lowerBound, upperBound, 0, self.size - 1, 0)
-  
+            self.tree[a] = self.find(self.tree[a])
+            return self.tree[a]
+
+    def unite(self, a, b):
+        a = self.find(a)
+        b = self.find(b)
+        if a == b: return
+        if self.rank[a] < self.rank[b]: self.tree[a] = b
+        else:
+            self.tree[b] = a
+            if self.rank[a] == self.rank[b]: self.rank[a] += 1
+
+    def isConnect(self, a, b):
+        return self.find(a) == self.find(b)
+
+class Fraction:
+    def __init__(self, x: int, y: int):
+        self.x = x
+        self.y = y
+
+    def getCoordinate(self):
+        return (self.x, self.y)
+    
+    def __lt__(self, other):
+        return self.y * other.x < self.x * other.y
+    
+    def __le__(self, other):
+        return self.y * other.x <= self.x * other.y
+    
+    def __eq__(self, other):
+        return self.y * other.x == other.y * self.x
+
+class Grid:
+    def __init__(self, H: int, W: int):
+        self.H = H
+        self.W = W
+
+    def isInside(self, h, w):
+        return 0 <= h < self.H and 0 <= w < self.W
+
+def modPow(base, exp, mod):
+    if exp == 0: return 1
+    elif exp == 1: return base % mod
+    half = modPow(base, exp >> 1, mod)
+    if exp % 2 == 0:
+        return (half * half) % mod
+    else:
+        return (half * half * base) % mod
+
 def solve():
     input = sys.stdin.readline 
-    INF = 10 ** 25
-    mod = 7 + 10 ** 9
+    mod = 998244353
+
     return 0
-  
+                            
 if __name__ == "__main__":
-    solve()
+    solve() 

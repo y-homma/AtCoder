@@ -1,7 +1,7 @@
 import sys
 from collections import deque
 # from itertools import permutations
-# from heapq import heapify, heappop, heappush
+from heapq import heapify, heappop, heappush
 # from sortedcontainers import SortedSet, SortedList, SortedDict
 import bisect
 sys.setrecursionlimit(10**6)
@@ -97,35 +97,47 @@ def isInside(h, w, H, W):
 
 def solve():
     input = sys.stdin.readline 
-    H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
-    Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-    while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
+    N, M, K = map(int, input().split())
+    H = list(map(int, input().split()))
+    W = list(map(int, input().split()))
 
+    E = [[] for _ in range(N)]
+    for _ in range(M):
+        u, v = map(int, input().split())
+        u -= 1
+        v -= 1
+
+        if H[u] > H[v]:
+            E[u].append(v)
+        elif H[u] < H[v]:
+            E[v].append(u)
+    
+    S = []
+    if K > 0:
+        S = list(map(int, input().split()))
+    for i in range(K):
+        S[i] -= 1
+    S = set(S)
+    
+    INF = 1000000000
+    WS = [INF] * N
+    Q = [(-H[i], i) for i in range(N)]
+    heapify(Q)
+    while len(Q) > 0:
+        height, idx = heappop(Q)
+        height *= -1
+        if WS[idx] == INF:
+            if idx in S or len(E[idx]) == 0:
+                WS[idx] = W[idx]
+            else:
+                WS[idx] = 0
+                child = len(E[idx])
+                d = W[idx] / child
+                for ni in E[idx]:
+                    W[ni] += d
+    print(*WS)
+
+               
     return 0
                             
 if __name__ == "__main__":

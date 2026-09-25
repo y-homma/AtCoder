@@ -92,39 +92,65 @@ class UFT: #Union-find tree class
             self.tree[b] = a
             if self.rank[a] == self.rank[b]: self.rank[a] += 1
 
+class Fraction:
+    def __init__(self, x: int, y: int):
+        self.x = x
+        self.y = y
+
+    def getCoordinate(self):
+        return (self.x, self.y)
+    
+    def __lt__(self, other):
+        return self.y * other.x < self.x * other.y
+    
+    def __le__(self, other):
+        return self.y * other.x <= self.x * other.y
+    
+    def __eq__(self, other):
+        return self.y * other.x == other.y * self.x
+
 def isInside(h, w, H, W):
     return 0 <= h < H and 0 <= w < W
 
+def modPow(base, exp, mod):
+    if exp == 0: return 1
+    elif exp == 1: return base % mod
+    half = modPow(base, exp >> 1, mod)
+    if exp % 2 == 0:
+        return (half * half) % mod
+    else:
+        return (half * half * base) % mod
+
 def solve():
     input = sys.stdin.readline 
-    H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
-    Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-    while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
+    N, M, K = map(int, input().split())
+    S = input().strip("\n")
+    xc = S.count("x")
+    fromLeft = [0] * N
+    if S[0] == "x": fromLeft[0] = 1
+    for i in range(1, N):
+        add = 1 if S[i] == "x" else 0
+        fromLeft[i] = fromLeft[i-1] + add
+    # print(fromLeft)
+
+    ans = 0
+    usedX = 0
+    for i in range(N):
+        left = i
+        right = N * M + 1
+        while right - left > 1:
+            mid = (left + right) >> 1
+            # 何ループ+αか
+            loop = mid // N
+            extra = mid % N
+            # print(f"Left {left} - Right {right}; mid {mid}; loop {loop}; extra {extra}")
+            Xs = (loop - 1) * xc + (xc - usedX)
+            if extra > 0: Xs += fromLeft[extra - 1]
+            if Xs <= K: left = mid
+            else: right = mid
+        ans = max(ans, left - i)
+        if S[i] == "x": usedX += 1
+    print(ans)
 
     return 0
                             

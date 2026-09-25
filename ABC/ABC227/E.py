@@ -92,40 +92,76 @@ class UFT: #Union-find tree class
             self.tree[b] = a
             if self.rank[a] == self.rank[b]: self.rank[a] += 1
 
+class Fraction:
+    def __init__(self, x: int, y: int):
+        self.x = x
+        self.y = y
+
+    def getCoordinate(self):
+        return (self.x, self.y)
+    
+    def __lt__(self, other):
+        return self.y * other.x < self.x * other.y
+    
+    def __le__(self, other):
+        return self.y * other.x <= self.x * other.y
+    
+    def __eq__(self, other):
+        return self.y * other.x == other.y * self.x
+
 def isInside(h, w, H, W):
     return 0 <= h < H and 0 <= w < W
 
 def solve():
     input = sys.stdin.readline 
-    H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
-    Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-    while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
+    S = input().strip("\n")
+    K = int(input())
+    L = len(S)
+    ec = S.count("E")
+    yc = S.count("Y")
+    maxMove = min(L * L, K)
+    DP = [[[[0 for y in range(yc + 1)] for e in range(ec + 1)] for x in range(maxMove + 1)] for _ in range(L)]
+    fK, fE, fY = -1, -1, -1
+    for i in range(L):
+        if S[i] == "K" and fK == -1:
+            fK = i
+        if S[i] == "E" and fE == -1:
+            fE = i
+        if S[i] == "Y" and fY == -1:
+            fY = i
+    if fK > -1 and fK <= maxMove: DP[0][fK][0][0] = 1
+    if fE > -1 and fE <= maxMove: DP[0][fE][1][0] = 1
+    if fY > -1 and fY <= maxMove: DP[0][fY][0][1] = 1
+    SI = {"K": 0, "E": 1, "Y": 2}
 
+    for i in range(L - 1):
+        for k in range(maxMove + 1):
+            for e in range(ec + 1):
+                for y in range(yc + 1):
+                    count = DP[i][k][e][y]
+                    if count > 0:
+                        LC = [i+1-e-y, e, y]
+                        Left = []
+                        for j in range(L):
+                            li = SI[S[j]]
+                            if LC[li] == 0:
+                                Left.append(S[j])
+                            else:
+                                LC[li] -= 1
+                        nK, nE, nY = -1, -1, -1
+                        for j in range(len(Left)):
+                            if Left[j] == "K" and nK == -1: nK = j
+                            if Left[j] == "E" and nE == -1: nE = j
+                            if Left[j] == "Y" and nY == -1: nY = j
+                        if nK > -1 and k+nK <= maxMove: DP[i+1][k+nK][e][y] += count
+                        if nE > -1 and k+nE <= maxMove: DP[i+1][k+nE][e+1][y] += count
+                        if nY > -1 and k+nY <= maxMove: DP[i+1][k+nY][e][y+1] += count
+    
+    ans = 0
+    for k in range(maxMove + 1):
+        ans += DP[L-1][k][ec][yc]
+    print(ans)
+    # print(DP)
     return 0
                             
 if __name__ == "__main__":

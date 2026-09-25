@@ -99,10 +99,10 @@ def solve():
     S = [tuple(map(int, input().split())) for _ in range(N)]
     A = int(input())
     AL = list(map(int, input().split()))
-    AL.append(H)
+    AL.append(W)
     B = int(input())
     BL = list(map(int, input().split()))
-    BL.append(W)
+    BL.append(H)
 
     D = dict()
     for i, v in enumerate(S):
@@ -113,10 +113,11 @@ def solve():
     
     minCount = N
     maxCount = 0
+    L = len(D.keys())
     for v in D.values():
         minCount = min(minCount, v)
         maxCount = max(maxCount, v)
-    if N < (A + 1) * (B + 1):
+    if L < (A + 1) * (B + 1):
         minCount = 0
     print(f"{minCount} {maxCount}")
 
