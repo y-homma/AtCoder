@@ -97,35 +97,24 @@ def isInside(h, w, H, W):
 
 def solve():
     input = sys.stdin.readline 
-    H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
+    N = int(input())
+    A = list(map(int, input().split()))
     Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-    while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
-
+    for a in A:
+        Q.append(a)
+        if len(Q) > 3:
+            a4 = Q.pop()
+            a3 = Q.pop()
+            a2 = Q.pop()
+            a1 = Q.pop()
+            if a1 == a2 and a2 == a3 and a3 == a4:
+                continue
+            else:
+                Q.append(a1)
+                Q.append(a2)
+                Q.append(a3)
+                Q.append(a4)
+    print(len(Q))
     return 0
                             
 if __name__ == "__main__":

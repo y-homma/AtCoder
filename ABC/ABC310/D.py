@@ -92,39 +92,42 @@ class UFT: #Union-find tree class
             self.tree[b] = a
             if self.rank[a] == self.rank[b]: self.rank[a] += 1
 
-def isInside(h, w, H, W):
-    return 0 <= h < H and 0 <= w < W
-
 def solve():
     input = sys.stdin.readline 
-    H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
-    Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-    while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
+    N, T, M = map(int, input().split())
+    E = [[False] * N for _ in range(N)]
+    for _ in range(M):
+        a, b = map(int, input().split())
+        E[a-1][b-1] = True
+        E[b-1][a-1] = True
+
+    Team = [[] for _ in range(T)]
+    def dfs(i, t, teamNum):
+        if i == N-1:
+            for a in Team[t]:
+                if E[i][a]:
+                    return 0
+            Team[t].append(i)
+            for team in Team:
+                if len(team) == 0:
+                    Team[t].pop()
+                    return 0
+            # print(Team)
+            Team[t].pop()
+            return 1
+        else:
+            for a in Team[t]:
+                if E[i][a]:
+                    return 0
+            ans = 0
+            Team[t].append(i)
+            for nt in range(min(T, teamNum + 2)):
+                ans += dfs(i+1, nt, max(nt, teamNum))
+            Team[t].pop()
+            return ans
+        
+    ans = dfs(0, 0, 0)
+    print(ans)
 
     return 0
                             

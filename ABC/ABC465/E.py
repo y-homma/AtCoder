@@ -1,7 +1,7 @@
 import sys
 from collections import deque
 # from itertools import permutations
-# from heapq import heapify, heappop, heappush
+from heapq import heapify, heappop, heappush
 # from sortedcontainers import SortedSet, SortedList, SortedDict
 import bisect
 sys.setrecursionlimit(10**6)
@@ -95,36 +95,64 @@ class UFT: #Union-find tree class
 def isInside(h, w, H, W):
     return 0 <= h < H and 0 <= w < W
 
+def updateBit(curBit, num):
+    return curBit | (1 << num)
+
+def countBit(bit):
+    count = 0
+    base = bit
+    for i in range(10):
+        count += base % 2
+        base >>= 1
+    return count
+
 def solve():
     input = sys.stdin.readline 
-    H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
-    Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-    while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
+    N = int(input())
+    mod = 998244353
+    NS = str(N)
+    size = len(NS)
+    DP = [[[[0 for isLower in range(2)] for mod3 in range(3)] for useBit in range(2 ** 10)] for _ in range(size)]
+    topNum = int(NS[0])
+    DP[0][updateBit(0, topNum)][topNum % 3][0] = 1
+    DP[0][0][0][1] = 1
+    for k in range(1, topNum):
+        DP[0][1 << k][k % 3][1] = 1
+
+    for i in range(1, size):
+        num = int(NS[i])
+        for prevBit in range(2 ** 10):
+            for prevMod in range(3):
+                baseMod = (prevMod * 10) % 3
+                prevTop = DP[i-1][prevBit][prevMod][0]
+                prevLow = DP[i-1][prevBit][prevMod][1]
+                if prevTop > 0:
+                    DP[i][updateBit(prevBit, num)][(baseMod + num) % 3][0] += prevTop
+                    for k in range(num):
+                        DP[i][updateBit(prevBit, k)][(baseMod + k) % 3][1] += prevTop
+                if prevLow > 0:
+                    for k in range(10):
+                        if k == 0 and prevBit == 0:
+                            DP[i][0][baseMod][1] = (DP[i][0][baseMod][1] + prevLow) % mod
+                        else:
+                            newBit = updateBit(prevBit, k)
+                            DP[i][newBit][(baseMod + k) % 3][1] = (DP[i][newBit][(baseMod + k) % 3][1] + prevLow) % mod
+    
+    ans = 0
+    for bit in range(1, 2 ** 10):
+        isType3 = countBit(bit) == 3
+        isIn3 = (bit & (1 << 3)) > 0
+        if isType3 and isIn3:
+            continue
+        for mod3 in range(3):
+            isMult3 = mod3 == 0
+            if (isIn3 and isMult3) or (isMult3 and isType3):
+                continue
+            if not isIn3 and not isType3 and not isMult3:
+                continue
+            ans = (ans + DP[size-1][bit][mod3][0] + DP[size-1][bit][mod3][1]) % mod
+
+    print(ans)
 
     return 0
                             

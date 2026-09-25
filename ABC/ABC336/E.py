@@ -3,7 +3,7 @@ from collections import deque
 # from itertools import permutations
 # from heapq import heapify, heappop, heappush
 # from sortedcontainers import SortedSet, SortedList, SortedDict
-import bisect
+# import bisect
 sys.setrecursionlimit(10**6)
 
 class Alphabet: #Trueなら大文字
@@ -97,34 +97,40 @@ def isInside(h, w, H, W):
 
 def solve():
     input = sys.stdin.readline 
-    H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
-    Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-    while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
+    N = int(input())
+    NS = str(N)
+    BIT = len(NS)
+    maxDS = 9 * BIT
+    ans = 0
+    for i in range(1, maxDS+1):
+        DP = [[[[0] * i for total in range(maxDS+1)] for f in range(2)] for _ in range(BIT)]
+        maxN0 = int(NS[0])
+        DP[0][0][maxN0][maxN0 % i] = 1
+        for j in range(1, maxN0):
+            DP[0][1][j][j % i] += 1
+        
+        for d in range(1, BIT):
+            n = int(NS[d])
+            for t in range(maxDS+1):
+                # trailing 0
+                if t == 0:
+                    for k in range(1, 10):
+                        DP[d][1][k][k%i] += 1
+                for j in range(i):
+                    preTop = DP[d-1][0][t][j]
+                    if preTop > 0:
+                        DP[d][0][t+n][(j*10+n)%i] += preTop
+                        for k in range(n):
+                            DP[d][1][t+k][(j*10+k)%i] += preTop
+                    
+                    preUnder = DP[d-1][1][t][j]
+                    if preUnder > 0:
+                        for k in range(10):
+                            DP[d][1][t+k][(j*10+k)%i] += preUnder
+
+        ans += DP[BIT-1][0][i][0] + DP[BIT-1][1][i][0]
+    print(ans)
+                
 
     return 0
                             

@@ -97,35 +97,42 @@ def isInside(h, w, H, W):
 
 def solve():
     input = sys.stdin.readline 
-    H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
-    Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-    while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
+    N, Q = map(int, input().split())
+    M = [tuple(map(int, input().split())) for _ in range(N)]
+    M.append((0, 0))
+    Ans = [0] * Q
+    Z = [int(input()) for _ in range(Q)]
+    U = UFT(N)
+    UH = dict()
+    L = [(M[i][0], i) for i in range(N)]
+    for i, x in enumerate(Z):
+        L.append((x, -i-1))
+    L.sort(reverse=True)
+    Appear = [False] * N
+    ans = 0
+    for i, l in enumerate(L):
+        height, idx = l
+        if idx < 0:
+            idx = (idx + 1) * -1
+            Ans[idx] = ans
+        else:
+            Appear[idx] = True
+            UH[idx] = M[idx][1]
+            ans += M[idx][1]
+            isConnectLeft = (idx > 0) and (Appear[idx-1])
+            isConnectRight = (idx < N-1) and (Appear[idx+1])
+            if isConnectLeft and isConnectRight:
+                lp = U.find(idx-1)
+                rp = U.find(idx+1)
+                lh = UH[lp]
+                rh = UH[rp]
+                maxH = max(max(lh, rh), UH[idx])
+                ans += maxH - UH[idx] - lh - rh
+                U.unite(lp, idx)
+                U.unite(rp, idx)
 
+
+    print(*Ans, sep="\n")               
     return 0
                             
 if __name__ == "__main__":

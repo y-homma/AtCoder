@@ -98,34 +98,50 @@ def isInside(h, w, H, W):
 def solve():
     input = sys.stdin.readline 
     H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
-    Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-    while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
+    C = [input().strip("\n") for _ in range(H)]
+    fin = False
+    while not fin:
+        finA = True
+        finB = True
+        finC = True
+        finD = True
+        for i in range(len(C[0])):
+            if C[0][i] == "#":
+                break
+        else:
+            finA = False
+            C.pop(0)
+        
+        L = len(C)
+        for i in range(len(C[L-1])):
+            if C[L-1][i] == "#":
+                break
+        else:
+            finB = False
+            C.pop(L-1)
+        
+        for i in range(len(C)):
+            if C[i][0] == "#":
+                break
+        else:
+            finC = False
+            for i in range(len(C)):
+                C[i] = C[i][1:]
+            
+        for i in range(len(C)):
+            if C[i][-1] == "#":
+                break
+        else:
+            finD = False
+            for i in range(len(C)):
+                size = len(C[i])
+                C[i] = C[i][:size-1]
 
+        fin = finA and finB and finC and finD
+    
+    for i in range(len(C)):
+        print(C[i])
+                
     return 0
                             
 if __name__ == "__main__":

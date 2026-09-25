@@ -92,39 +92,68 @@ class UFT: #Union-find tree class
             self.tree[b] = a
             if self.rank[a] == self.rank[b]: self.rank[a] += 1
 
-def isInside(h, w, H, W):
-    return 0 <= h < H and 0 <= w < W
-
 def solve():
     input = sys.stdin.readline 
     H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
-    Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-    while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
+    C = [input().strip("\n") for _ in range(H)]
+    HC = [[0] * 26 for _ in range(H)]
+    WC = [[0] * 26 for _ in range(W)]
+    A = Alphabet(False)
+    for h in range(H):
+        for w in range(W):
+            col = C[h][w]
+            ci = A.index(col)
+            HC[h][ci] += 1
+            WC[w][ci] += 1
+    
+    count = 0
+    while True:
+        DH = []
+        for h in range(H):
+            col = -1
+            for i in range(26):
+                if HC[h][i] > 0:
+                    if col == -1:
+                        col = i
+                    else:
+                        break
+            else:
+                if col > -1 and HC[h][col] >= 2:
+                    DH.append((h, col))
+        DW = []
+        for w in range(W):
+            col = -1
+            for i in range(26):
+                if WC[w][i] > 0:
+                    if col == -1:
+                        col = i
+                    else:
+                        break
+            else:
+                if col > -1 and WC[w][col] >= 2:
+                    DW.append((w, col))
+        if len(DH) + len(DW) == 0:
+            break
+        
+        # print(f"Turn {count}")
+        # print(DH)
+        # print(DW)
+        # 消すフェーズ
+        for h, i in DH:
+            HC[h][i] = 0
+            for w in range(W):
+                if WC[w][i] > 0:
+                    WC[w][i] -= 1
+        for w, i in DW:
+            WC[w][i] = 0
+            for h in range(H):
+                if HC[h][i] > 0:
+                    HC[h][i] -= 1
+        # count += 1
+    ans = 0
+    for h in range(H):
+        ans += sum(HC[h])
+    print(ans)
 
     return 0
                             

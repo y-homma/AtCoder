@@ -92,39 +92,21 @@ class UFT: #Union-find tree class
             self.tree[b] = a
             if self.rank[a] == self.rank[b]: self.rank[a] += 1
 
-def isInside(h, w, H, W):
-    return 0 <= h < H and 0 <= w < W
-
 def solve():
     input = sys.stdin.readline 
-    H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
-    Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-    while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
+    N, D, P = map(int, input().split())
+    F = list(map(int, input().split()))
+    F.sort()
+    FS = [0] * (N+1)
+    for i, f in enumerate(F):
+        FS[i+1] = FS[i] + f
+    
+    ans = FS[N]
+    for i in range(N):
+        sets = (i + 1) // D
+        if (i + 1) % D > 0: sets += 1
+        ans = min(ans, sets * P + FS[N-i-1])
+    print(ans)
 
     return 0
                             

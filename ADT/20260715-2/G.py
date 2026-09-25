@@ -92,39 +92,44 @@ class UFT: #Union-find tree class
             self.tree[b] = a
             if self.rank[a] == self.rank[b]: self.rank[a] += 1
 
+class Fraction:
+    def __init__(self, x: int, y: int):
+        self.x = x
+        self.y = y
+
+    def getCoordinate(self):
+        return (self.x, self.y)
+    
+    def __lt__(self, other):
+        return self.y * other.x < self.x * other.y
+    
+    def __le__(self, other):
+        return self.y * other.x <= self.x * other.y
+
 def isInside(h, w, H, W):
     return 0 <= h < H and 0 <= w < W
 
 def solve():
     input = sys.stdin.readline 
-    H, W = map(int, input().split())
-    S = [input().strip("\n") for _ in range(H)]
-    INF = 1000000000
-    D = [[INF] * W for _ in range(H)]
-    Q = deque()
-    Q.append((0, 0, 0))
-    M = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-    while len(Q) > 0:
-        h, w, c = Q.popleft()
-        if c < D[h][w]:
-            # print(f"H: {h}, W: {w}, Count: {c}")
-            D[h][w] = c
-            for move in M:
-                nh = h + move[0]
-                nw = w + move[1]
-                if isInside(nh, nw, H, W):
-                    if S[nh][nw] == "." and c < D[nh][nw]:
-                        Q.appendleft((nh, nw, c))
-                    elif S[nh][nw] == "#" and c + 1 <= D[nh][nw]:
-                        # nh, nwを起点に壁を破壊する
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                nnh = nh + i
-                                nnw = nw + j
-                                if isInside(nnh, nnw, H, W) and c + 1 < D[nnh][nnw]:
-                                    Q.append((nnh, nnw, c + 1))
-    print(D[H-1][W-1])
-    # print(D)
+    N = int(input())
+    C = [tuple(map(int, input().split())) for _ in range(N)]
+    mod = 998244353 
+    DP = [[0, 0] for _ in range(N)]
+    DP[0][0] = 1
+    DP[0][1] = 1
+    for i in range(1, N):
+        a, b = C[i]
+        preA, preB = C[i-1]
+        preDA, preDB = DP[i-1]
+        if a != preA:
+            DP[i][0] = (DP[i][0] + preDA) % mod
+        if a != preB:
+            DP[i][0] = (DP[i][0] + preDB) % mod
+        if b != preA:
+            DP[i][1] = (DP[i][1] + preDA) % mod
+        if b != preB:
+            DP[i][1] = (DP[i][1] + preDB) % mod
+    print(sum(DP[N-1]) % mod)
 
     return 0
                             
