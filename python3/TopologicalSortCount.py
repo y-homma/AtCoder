@@ -1,22 +1,18 @@
-import sys
-
-def TSCount(): #頂点数32以下の時トポロジカルソートのとり得る並べ方を数え上げる
-    N, M = map(int, input().split())
-    Son = [0] * N
-    nbit = [1 << i for i in range(N)] #i番目の頂点はi-bit目が1でその他は0
-    for _ in range(M):
-        x, y = map(int, input().split())
-        Son[x - 1] |= nbit[y - 1] #頂点xから向かう頂点集合のy-bit目のbitを立てる
-    DP = [0] * (1 << N)
-    DP[0] = 1
-
-    for i in range(2 ** N):
-        for j, n in enumerate(nbit):
-            if (i & n) == 0 and (i & Son[j]) == 0: #頂点集合iがjを含まず、jから向かう頂点集合(Son[j])も含まない時
-                DP[i | n] += DP[i] #頂点集合iにjを加えた集合に加算する
-    print(DP[-1])
-
-    return 0
-
-if __name__ == "__main__":
-    TSCount()
+def count_topological_sort(N: int, edges, mod: int | None = None) -> int:
+    """トポロジカル順序の個数を bit DP で数える。O(2^N · N)、N ≲ 20 程度
+    edges: [(u, v), ...]  u -> v の有向辺（0-indexed, u を v より先に置く）
+    mod を指定するとその余りを返す
+    """
+    pred = [0] * N  # pred[v]: v より先に置く必要がある頂点の集合
+    for u, v in edges:
+        pred[v] |= 1 << u
+    dp = [0] * (1 << N)
+    dp[0] = 1
+    for S in range(1 << N):  # S: すでに並べた頂点の集合
+        x = dp[S]
+        if x == 0: continue
+        if mod is not None: x %= mod; dp[S] = x
+        for v in range(N):
+            if not (S >> v) & 1 and (pred[v] & S) == pred[v]:
+                dp[S | 1 << v] += x
+    return dp[-1] % mod if mod is not None else dp[-1]

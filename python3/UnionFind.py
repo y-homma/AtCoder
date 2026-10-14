@@ -1,30 +1,41 @@
-class UFT: #Union-find tree class
-    def __init__(self, N): 
-        self.tree = [int(i) for i in range(N)] 
-        self.rank = [0 for i in range(N)]
+from collections import defaultdict
 
-    def find(self, a):
-        if self.tree[a] == a: return a
-        else:
-            self.tree[a] = self.find(self.tree[a])
-            return self.tree[a]
 
-    def unite(self, a, b):
-        a = self.find(a)
-        b = self.find(b)
-        if a == b: return
-        if self.rank[a] < self.rank[b]: self.tree[a] = b
-        else:
-            self.tree[b] = a
-            if self.rank[a] == self.rank[b]: self.rank[a] += 1
+class UFT:
+    """Union-Find (union by size + 経路圧縮)"""
+    __slots__ = ("n", "p", "count")
 
-def debug():
-    N, M = map(int, input().split())
-    parent = UFT(N)
-    for i in range(M):
-        x, y, z = map(int, input().split())
-        parent.unite(x-1, y-1)
-    for i in range(N):
-        parent.find(i)
+    def __init__(self, N: int):
+        self.n = N
+        self.p = [-1] * N   # 根なら -(サイズ)、それ以外は親
+        self.count = N      # 連結成分の数
 
-    print(len(set(parent.tree)))
+    def find(self, a: int) -> int:
+        p = self.p
+        r = a
+        while p[r] >= 0: r = p[r]
+        while p[a] >= 0:
+            p[a], a = r, p[a]
+        return r
+
+    def unite(self, a: int, b: int) -> bool:
+        """併合したら True、すでに同じ成分なら False"""
+        a = self.find(a); b = self.find(b)
+        if a == b: return False
+        p = self.p
+        if p[a] > p[b]: a, b = b, a
+        p[a] += p[b]
+        p[b] = a
+        self.count -= 1
+        return True
+
+    def same(self, a: int, b: int) -> bool:
+        return self.find(a) == self.find(b)
+
+    def size(self, a: int) -> int:
+        return -self.p[self.find(a)]
+
+    def groups(self) -> list:
+        g = defaultdict(list)
+        for i in range(self.n): g[self.find(i)].append(i)
+        return list(g.values())

@@ -1,23 +1,43 @@
-class SquareDiv(): #区間の最大値を求める
-    def __init__(self, N, V):
-        k = 1
-        while k ** 2 < N: k += 1
-        self.array = [V] * k
-        self.size = k
-        self.indivisual = [V] * N
+INF = 1 << 60
 
-    def update(self, i, v): #i番目をvに更新する
-        self.indivisual[i] = v
-        self.array[i // self.size] = max(self.array[i // self.size], v)
 
-    def search(self, left, right): #[left, right]の最大値を求める
-        lk, rk = left // self.size, right // self.size
-        if lk == rk:
-            maxN = 0
-            for i in range(left, right + 1): maxN = max(maxN, self.indivisual[i])
-            return maxN
-        else:
-            maxN = self.search(left, (lk + 1) * self.size - 1)
-            for k in range(lk + 1, rk): maxN = max(maxN, self.array[k])
-            maxN = max(maxN, self.search(rk * self.size, right))
-            return maxN
+class SquareDiv:
+    """平方分割による区間 max（0-indexed, 区間は半開 [l, r)）
+    1 点更新 O(√N)、区間 max O(√N)。改造（区間加算など）のベースとして使う
+    """
+
+    def __init__(self, init: int | list, e=-INF):
+        # init: 初期値のリスト、または要素数 (int, 全部 e)
+        if isinstance(init, int):
+            init = [e] * init
+        self.n = n = len(init)
+        self.e = e
+        b = 1
+        while b * b < n: b += 1
+        self.b = b                        # ブロックの大きさ
+        self.a = list(init)
+        self.block = [max(self.a[i:i + b], default=e) for i in range(0, n, b)] or [e]
+
+    def set(self, i: int, v):
+        """A[i] = v"""
+        self.a[i] = v
+        k = i // self.b
+        self.block[k] = max(self.a[k * self.b:(k + 1) * self.b])
+
+    def get(self, i: int):
+        return self.a[i]
+
+    def max(self, l: int, r: int):
+        """max(A[l], ..., A[r-1])。l >= r なら e"""
+        a, b, block = self.a, self.b, self.block
+        res = self.e
+        while l < r and l % b:
+            if a[l] > res: res = a[l]
+            l += 1
+        while l + b <= r:
+            if block[l // b] > res: res = block[l // b]
+            l += b
+        while l < r:
+            if a[l] > res: res = a[l]
+            l += 1
+        return res
