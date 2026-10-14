@@ -7,6 +7,9 @@ from math import gcd, lcm, isqrt
 import bisect
 # from sortedcontainers import SortedSet, SortedList, SortedDict
 sys.setrecursionlimit(10**6)
+
+# Copied template from https://github.com/y-homma/AtCoder/blob/master/python3/Template.py
+
 try:  # PyPy で深い再帰を速くする
     import pypyjit
     pypyjit.set_param('max_unroll_recursion=-1')
